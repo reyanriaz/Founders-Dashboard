@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M Technologies — Founder's Dashboard (Demo)</title>
+<style>
+  :root {
+    --bg: #0d0e12;
+    --panel: #16181f;
+    --panel-2: #1d2029;
+    --accent: #4f8cff;
+    --accent-2: #2bd4bd;
+    --danger: #ff5d6c;
+    --text: #e8eaf0;
+    --text-dim: #8b8fa3;
+    --border: #262936;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .wrap { max-width: 600px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 24px; }
+  header .logo { font-weight: 700; letter-spacing: 2px; font-size: 14px; color: var(--text-dim); }
+  header h1 { font-size: 22px; margin: 4px 0 0; }
+  .setup {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .setup label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 6px; }
+  .setup input {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 14px;
+  }
+  .setup small { color: var(--text-dim); display: block; margin-top: 6px; font-size: 11px; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .panel h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+  }
+  .mic-row { display: flex; align-items: center; gap: 12px; }
+  .mic-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s, background 0.15s;
+  }
+  .mic-btn:active { transform: scale(0.93); }
+  .mic-btn.recording { background: var(--danger); animation: pulse 1.2s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,93,108,0.5); }
+    70% { box-shadow: 0 0 0 14px rgba(255,93,108,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,93,108,0); }
+  }
+  .transcript {
+    flex: 1;
+    min-height: 56px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+  }
+  .transcript.has-text { color: var(--text); }
+
+  .result-box {
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    display: none;
+  }
+  .result-box.show { display: block; }
+  .result-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .result-row .k { color: var(--text-dim); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .badge.high { background: rgba(43,212,189,0.15); color: var(--accent-2); }
+  .badge.medium { background: rgba(255,200,87,0.15); color: #ffc857; }
+  .badge.low { background: rgba(255,93,108,0.15); color: var(--danger); }
+
+  .confirm-row { display: flex; gap: 8px; margin-top: 12px; }
+  .confirm-row button {
+    flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-confirm { background: var(--accent-2); color: #0d0e12; }
+  .btn-reject { background: var(--panel-2); color: var(--text-dim); border: 1px solid var(--border) !important; }
+
+  .employee-grid { display: flex; flex-direction: column; gap: 10px; }
+  .employee-card {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .employee-card .name { font-weight: 600; font-size: 14px; }
+  .employee-card .task { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .employee-card .status {
+    font-size: 11px; margin-top: 6px; display: inline-block;
+    padding: 2px 8px; border-radius: 20px;
+  }
+  .status.pending { background: rgba(79,140,255,0.15); color: var(--accent); }
+  .status.done { background: rgba(43,212,189,0.15); color: var(--accent-2); }
+
+  .log { font-size: 12px; color: var(--text-dim); margin-top: 10px; }
+  .error { color: var(--danger); font-size: 13px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">M TECHNOLOGIES</div>
+    <h1>Founder's Dashboard — Working Demo</h1>
+  </header>
+
+  <div class="panel">
+    <h2>CEO — Voice Command</h2>
+    <div class="mic-row">
+      <button class="mic-btn" id="micBtn">🎙️</button>
+      <div class="transcript" id="transcript">Tap mic and say something like "tell Sara to clean table 5"</div>
+    </div>
+
+    <div class="result-box" id="resultBox">
+      <div class="result-row"><span class="k">Employee</span><span id="resEmployee">—</span></div>
+      <div class="result-row"><span class="k">Task</span><span id="resTask">—</span></div>
+      <div class="result-row"><span class="k">Confidence</span><span id="resConfidence">—</span></div>
+      <div class="confirm-row" id="confirmRow" style="display:none;">
+        <button class="btn-confirm" id="btnConfirm">Confirm & Assign</button>
+        <button class="btn-reject" id="btnReject">Discard</button>
+      </div>
+    </div>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Employee Status</h2>
+    <div class="employee-grid" id="employeeGrid"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Shift Summary</h2>
+    <button class="btn-confirm" style="width:100%; padding:12px; border-radius:8px; border:none; font-weight:600; cursor:pointer;" id="btnSummarize">Summarize Feedback (Shift End)</button>
+    <div class="log" id="summaryOut"></div>
+  </div>
+</div>
+
+<script>
+const EMPLOYEES = ["Ahmed", "Sara", "Bilal"];
+let employeeState = {
+  "Ahmed": { task: null, status: null, feedback: null },
+  "Sara": { task: null, status: null, feedback: null },
+  "Bilal": { task: null, status: null, feedback: null },
+};
+let pendingResult = null;
+
+function renderEmployees() {
+  const grid = document.getElementById('employeeGrid');
+  grid.innerHTML = '';
+  EMPLOYEES.forEach(name => {
+    const e = employeeState[name];
+    const card = document.createElement('div');
+    card.className = 'employee-card';
+    card.innerHTML = `
+      <div class="name">${name}</div>
+      <div class="task">${e.task ? e.task : 'No task assigned'}</div>
+      ${e.task ? `<span class="status ${e.status === 'done' ? 'done' : 'pending'}">${e.status === 'done' ? 'Done' : 'Pending'}</span>` : ''}
+      ${e.task && e.status !== 'done' ? `<button data-name="${name}" class="markDoneBtn" style="margin-left:8px; font-size:11px; padding:3px 8px; border-radius:12px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer;">Mark done</button>` : ''}
+    `;
+    grid.appendChild(card);
+  });
+  document.querySelectorAll('.markDoneBtn').forEach(btn => {
+    btn.onclick = () => {
+      const name = btn.dataset.name;
+      employeeState[name].status = 'done';
+      employeeState[name].feedback = `${name} completed: ${employeeState[name].task}`;
+      renderEmployees();
+    };
+  });
+}
+renderEmployees();
+
+// --- Speech recognition ---
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const micBtn = document.getElementById('micBtn');
+const transcriptEl = document.getElementById('transcript');
+let recognition = null;
+let recording = false;
+
+if (!SpeechRecognition) {
+  transcriptEl.textContent = "Speech recognition not supported in this browser. Try Chrome.";
+  micBtn.disabled = true;
+} else {
+  recognition = new SpeechRecognition();
+  recognition.lang = 'en-US';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    transcriptEl.textContent = text;
+    transcriptEl.classList.add('has-text');
+    processCommand(text);
+  };
+  recognition.onerror = (event) => {
+    showError("Mic error: " + event.error);
+    setRecording(false);
+  };
+  recognition.onend = () => setRecording(false);
+}
+
+function setRecording(state) {
+  recording = state;
+  micBtn.classList.toggle('recording', state);
+}
+
+micBtn.onclick = () => {
+  if (!recognition) return;
+  if (recording) {
+    recognition.stop();
+  } else {
+    document.getElementById('errorMsg').textContent = '';
+    transcriptEl.textContent = 'Listening...';
+    transcriptEl.classList.remove('has-text');
+    setRecording(true);
+    recognition.start();
+  }
+};
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+}
+
+// --- Gemini extraction ---
+async function processCommand(ceoSpeech) {
+  showError('');
+  document.getElementById('resultBox').classList.remove('show');
+
+  try {
+    const res = await fetch('/api/extract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ceoSpeech, employees: EMPLOYEES })
+    });
+    const parsed = await res.json();
+    if (parsed.error) {
+      showError("API error: " + parsed.error);
+      return;
+    }
+    showResult(parsed);
+  } catch (err) {
+    showError("Failed to process: " + err.message);
+  }
+}
+
+function showResult(parsed) {
+  pendingResult = parsed;
+  document.getElementById('resEmployee').textContent = parsed.employee || 'No match';
+  document.getElementById('resTask').textContent = parsed.task || '—';
+  document.getElementById('resConfidence').innerHTML = `<span class="badge ${parsed.confidence}">${parsed.confidence}</span>`;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('confirmRow').style.display = (parsed.employee && EMPLOYEES.includes(parsed.employee)) ? 'flex' : 'none';
+
+  if (!parsed.employee || !EMPLOYEES.includes(parsed.employee)) {
+    showError("Couldn't confidently match an employee — assign manually or rephrase.");
+  }
+}
+
+document.getElementById('btnConfirm').onclick = () => {
+  if (!pendingResult || !pendingResult.employee) return;
+  employeeState[pendingResult.employee].task = pendingResult.task;
+  employeeState[pendingResult.employee].status = 'pending';
+  employeeState[pendingResult.employee].feedback = null;
+  renderEmployees();
+  document.getElementById('resultBox').classList.remove('show');
+  transcriptEl.textContent = 'Tap mic and say something like "tell Sara to clean table 5"';
+  transcriptEl.classList.remove('has-text');
+};
+document.getElementById('btnReject').onclick = () => {
+  document.getElementById('resultBox').classList.remove('show');
+};
+
+// --- Summarization ---
+document.getElementById('btnSummarize').onclick = async () => {
+  const feedbacks = EMPLOYEES
+    .filter(name => employeeState[name].feedback)
+    .map(name => `${name}: ${employeeState[name].feedback}`);
+
+  if (feedbacks.length === 0) {
+    document.getElementById('summaryOut').textContent = "No completed tasks yet — mark some as done first.";
+    return;
+  }
+
+  document.getElementById('summaryOut').textContent = "Summarizing...";
+
+  try {
+    const res = await fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ feedbacks })
+    });
+    const data = await res.json();
+    if (data.error) {
+      document.getElementById('summaryOut').textContent = "API error: " + data.error;
+      return;
+    }
+    document.getElementById('summaryOut').textContent = data.summary;
+  } catch (err) {
+    document.getElementById('summaryOut').textContent = "Failed: " + err.message;
+  }
+};
+</script>
+</body>
+</html>
